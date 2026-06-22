@@ -49,8 +49,8 @@ def _load_registry(registry: str) -> dict:
 def _build_prompt(goal: str, allowed: list[str], feedback: dict | None) -> str:
     lines = [
         "You convert a goal into a urirun flow. Return ONLY a YAML document, no prose, no code fences.",
-        "Shape: keys `task` (mapping), `allow` (list of URI globs), `steps` (list of "
-        "{id, uri, payload, depends_on}).",
+        "Exact shape (copy it): `task` is a MAPPING and every step `id` is a STRING in quotes:",
+        'task:\n  title: "<short title>"\nsteps:\n  - id: "step1"\n    uri: "scheme://host/.../command/op"\n    payload:\n      field: "value"',
         f"Use ONLY these URIs: {json.dumps(allowed)}.",
         f"GOAL: {goal}",
     ]
@@ -58,6 +58,32 @@ def _build_prompt(goal: str, allowed: list[str], feedback: dict | None) -> str:
         lines.append("The PREVIOUS flow FAILED — fix it and return a corrected YAML flow.")
         lines.append("Failure (structured):\n" + json.dumps(feedback, ensure_ascii=False, indent=2))
     return "\n".join(lines)
+
+
+def _normalize_flow_dict(raw: object) -> dict:
+    """Coerce the loose shapes models tend to emit into the strict Flow schema:
+    `task` as a bare string → {title: ...}; integer step `id`s → strings; a single
+    step mapping → a one-item list. Real structural errors still surface."""
+    d = dict(raw) if isinstance(raw, dict) else {}
+    task = d.get("task")
+    if isinstance(task, str):
+        d["task"] = {"title": task}
+    elif task is None:
+        d["task"] = {}
+    steps = d.get("steps")
+    if isinstance(steps, dict):
+        steps = [steps]
+    norm = []
+    for i, s in enumerate(steps or []):
+        if not isinstance(s, dict):
+            continue
+        s = dict(s)
+        s["id"] = str(s.get("id", f"s{i + 1}"))
+        if "payload" in s and not isinstance(s["payload"], dict):
+            s.pop("payload")
+        norm.append(s)
+    d["steps"] = norm
+    return d
 
 
 def _strip_fences(text: str) -> str:
@@ -93,6 +119,7 @@ def repair_loop(goal: str, registry: dict, planner: Callable[[str, list[str], di
     transcript: which YAML each attempt produced and why it failed, plus the
     final outcome.
     """
+    import yaml
     from urirun_flow import Flow, FlowError
 
     space = urirun.action_space(registry)
@@ -106,8 +133,8 @@ def repair_loop(goal: str, registry: dict, planner: Callable[[str, list[str], di
         record: dict[str, Any] = {"attempt": attempt, "yaml": yaml_text}
 
         try:
-            flow = Flow.from_yaml(yaml_text)
-        except (FlowError, ValueError) as exc:
+            flow = Flow(**_normalize_flow_dict(yaml.safe_load(yaml_text)))
+        except (FlowError, ValueError, yaml.YAMLError) as exc:
             feedback = {"stage": "parse", "error": str(exc)}
             record.update(ok=False, feedback=feedback); transcript.append(record); continue
 

@@ -62,6 +62,23 @@ def test_validate_rejects_unknown_uri() -> None:
     assert "shell://host/run/command/exec" in report["lastError"]["unknownUris"]
 
 
+def test_normalizes_loose_llm_yaml() -> None:
+    # a real model often emits `task` as a string and integer `id`s; the loop
+    # should coerce those rather than burn a repair attempt on them.
+    _cleanup()
+
+    def loose(goal, allowed, feedback=None):
+        return ("task: just a title\n"
+                "steps:\n- id: 1\n  uri: note://host/store/command/put\n"
+                "  payload: {key: k, value: v}\n")
+
+    report = repair_loop("x", _registry(), loose, execute=True, tries=1)
+    assert report["succeeded"] is True
+    assert report["flow"]["task"] == {"title": "just a title"}
+    assert report["flow"]["steps"][0]["id"] == "1"
+    _cleanup()
+
+
 def test_dry_run_plans_without_executing() -> None:
     _cleanup()
     report = repair_loop("save a note", _registry(), _stub_planner, execute=False, tries=1)
