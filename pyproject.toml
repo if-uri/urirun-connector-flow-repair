@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "urirun-connector-flow-repair"
+version = "0.1.0"
+description = "Self-correcting URI-flow connector for ifuri and urirun (NL -> YAML flow -> execute -> repair)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [{ name = "if-uri" }]
+dependencies = [
+  "urirun @ git+https://github.com/if-uri/urirun.git#subdirectory=adapters/python",
+  "urirun-flow @ git+https://github.com/if-uri/urirun-flow.git",
+  "urirun-connector-llm @ git+https://github.com/if-uri/urirun-connector-llm.git",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+hosted = ["litellm>=1.0"]
+
+[project.scripts]
+urirun-connector-flow-repair = "urirun_connector_flow_repair.core:main"
+
+[project.entry-points."urirun.bindings"]
+flow-repair = "urirun_connector_flow_repair.core:urirun_bindings"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["urirun_connector_flow_repair*"]
+
+[tool.setuptools.package-data]
+urirun_connector_flow_repair = ["connector.manifest.json"]
