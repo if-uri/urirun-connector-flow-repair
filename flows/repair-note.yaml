@@ -1,0 +1,30 @@
+# Meta-flow: a single URI step that runs the self-repair loop.
+#
+# `flow://host/repair/command/run` turns `goal` into a urirun flow over the
+# action space in `registry`, executes it, and repairs any failure by feeding the
+# error back to the LLM — all behind one URI. Compose it like any other step.
+#
+# Two registries are in play:
+#   * the OUTER registry (used to RUN this flow) must contain flow:// — i.e. this
+#     connector's bindings;
+#   * the `registry` payload below is the INNER action space the generated flow
+#     plans over (here a compiled registry of the connectors the goal may use).
+#
+# Run it (dry-run shows the plan; execute runs the loop — needs the inner
+# registry file and an LLM, see the llm connector for model/provider):
+#   urirun run 'flow://host/repair/command/run' \
+#     --payload @flows/repair-note.payload.json --allow 'flow://*' --execute
+# or as a flow document with a registry: field via `urirun-flow run`.
+task:
+  title: "Save a note, self-repairing"
+allow:
+  - "flow://*"
+steps:
+  - id: "repair"
+    uri: "flow://host/repair/command/run"
+    payload:
+      goal: "store a note named raport with value ok"
+      registry: "inner-registry.json"   # action space the generated flow plans over
+      model: "llama3"                    # bare -> Ollama; openrouter/... -> litellm
+      tries: 3
+      execute: true                      # run the generated steps (not just plan them)

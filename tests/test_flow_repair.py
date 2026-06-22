@@ -130,3 +130,16 @@ def test_manifest() -> None:
     assert m["id"] == "flow-repair"
     assert set(m["routes"]) == {ROUTE}
     assert m["uriSchemes"] == ["flow"]
+
+
+def test_ready_meta_flow_invokes_the_repair_route() -> None:
+    """The committed flows/repair-note.yaml is a valid flow whose step calls this
+    connector's flow:// route — i.e. the loop is composable as a URI step."""
+    import urirun_flow
+    path = os.path.join(os.path.dirname(HERE), "flows", "repair-note.yaml")
+    flow = urirun_flow.Flow.from_yaml(open(path, encoding="utf-8").read())
+    assert flow.steps and flow.steps[0].uri == ROUTE
+    assert flow.steps[0].payload.get("goal") and flow.steps[0].payload.get("registry")
+    # the route the meta-flow calls is in this connector's action space
+    registry = urirun.compile_registry(json.loads(json.dumps(urirun_bindings())))
+    assert ROUTE in {r["uri"] for r in urirun.list_routes(registry)}

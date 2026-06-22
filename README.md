@@ -52,6 +52,26 @@ Model/provider selection follows the [`llm`](https://github.com/if-uri/urirun-co
 connector: `model="openrouter/anthropic/claude-3.5-sonnet"` + `OPENROUTER_API_KEY`
 goes through litellm; `model="llama3"` hits a local Ollama.
 
+## Compose it as a URI step (`flows/`)
+
+The loop is itself a URI, so it composes inside a larger flow. The ready
+[`flows/repair-note.yaml`](flows/repair-note.yaml) is a one-step meta-flow:
+
+```yaml
+steps:
+  - id: "repair"
+    uri: "flow://host/repair/command/run"
+    payload:
+      goal: "store a note named raport with value ok"
+      registry: "inner-registry.json"   # action space the generated flow plans over
+      tries: 3
+      execute: true
+```
+
+Two registries are in play: the **outer** registry that runs this flow must
+contain `flow://` (this connector); the `registry` payload is the **inner** action
+space the generated flow plans over.
+
 ## Why it's safe
 
 - **Action-space validation** — a step whose URI is not in the registry is
