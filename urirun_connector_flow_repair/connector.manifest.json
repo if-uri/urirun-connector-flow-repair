@@ -50,5 +50,8 @@
         "goal": "check all sites and email me the failures"
       }
     }
+  ],
+  "adapterKinds": [
+    "local-function"
   ]
 }
