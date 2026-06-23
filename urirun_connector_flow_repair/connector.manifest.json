@@ -6,15 +6,49 @@
   "summary": "Generate a urirun flow (YAML) from natural language, execute it, and self-repair from failures via an LLM.",
   "description": "Flow Repair is an external urirun connector that turns a natural-language goal into a urirun flow as YAML, validates every step URI against the registry action space, runs the steps under policy, and — when a step fails — feeds the structured error back to an LLM to obtain a corrected flow, then re-runs (up to `tries`). LLM model/provider selection is delegated to the `llm` connector (provider-prefixed models go through litellm; bare models hit Ollama). Steps execute only with `--execute` / `mode=execute`.",
   "useCases": [
-    "Drive a node from a goal in plain language, with automatic correction when a step fails.",
-    "Turn NL into an auditable YAML flow restricted to the registry's allowed URIs.",
-    "Close the loop: failure -> structured error -> LLM patch -> re-run, without hand-editing the flow."
+    "Generate a urirun flow (YAML) from natural language.",
+    "Execute a flow and self-repair from failures.",
+    "Iterate a flow until it passes."
   ],
-  "flowExample": ["flow://host/repair/command/run"],
-  "requires": ["python>=3.10"],
-  "install": {"mode": "urirun-extra", "pipSpec": "urirun-connector-flow-repair @ git+https://github.com/if-uri/urirun-connector-flow-repair.git@v0.1.0"},
-  "provenance": "community",
-  "publisher": {"name": "if-uri", "url": "https://ifuri.com", "github": "https://github.com/if-uri"},
+  "flowExample": [
+    "flow://host/repair/command/run"
+  ],
+  "requires": [
+    "python>=3.10"
+  ],
+  "install": {
+    "mode": "urirun-extra",
+    "pipSpec": "urirun-connector-flow-repair @ git+https://github.com/if-uri/urirun-connector-flow-repair.git@v0.1.0"
+  },
+  "provenance": "verified",
+  "publisher": {
+    "name": "if-uri",
+    "url": "https://ifuri.com",
+    "github": "https://github.com/if-uri"
+  },
   "docsUrl": "https://github.com/if-uri/urirun-connector-flow-repair",
-  "keywords": ["llm", "ai", "flow", "yaml", "repair", "agent", "connector"]
+  "keywords": [
+    "llm",
+    "ai",
+    "flow",
+    "yaml",
+    "repair",
+    "agent",
+    "connector"
+  ],
+  "uriSchemes": [
+    "flow"
+  ],
+  "routes": [
+    "flow://host/repair/command/run"
+  ],
+  "examples": [
+    {
+      "title": "Repair and run a flow",
+      "uri": "flow://host/repair/command/run",
+      "payload": {
+        "goal": "check all sites and email me the failures"
+      }
+    }
+  ]
 }
