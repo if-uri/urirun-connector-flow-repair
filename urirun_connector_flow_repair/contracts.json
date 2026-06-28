@@ -1,0 +1,22 @@
+{
+  "contracts": {
+    "repair/command/run": {
+      "version": "v1",
+      "effect": "command",
+      "reversible": false,
+      "inp": { "goal": "?str", "registry": "?str", "model": "?str" },
+      "out": {
+        "succeeded": "bool", "attempts": "int",
+        "flow": "?obj", "transcript": "?list", "lastError": "?str"
+      },
+      "errors": ["precondition-unmet", "degraded-backend"],
+      "examples": [
+        {
+          "payload": { "goal": "list my repos", "registry": "bindings.json" },
+          "result": { "ok": true, "succeeded": true, "attempts": 1, "flow": {} }
+        }
+      ]
+    }
+  },
+  "wires": []
+}
