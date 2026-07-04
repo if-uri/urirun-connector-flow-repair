@@ -1,0 +1,11 @@
+# local.dev.txt — locally developed dependencies of this project (generated 2026-07-04)
+# by ~/github/local.dev.sh — DO NOT EDIT; see ~/github/local.dev.md
+# project: urirun-connector-flow-repair 0.1.0 (python) at /home/tom/github/if-uri/urirun-connector-flow-repair
+# deps declared: 5 | with local source: 3
+
+## LOCAL DEPS  (dep | required | local source (version) | installed | status)
+urirun | >=0.4.14 | /home/tom/github/if-uri/urirun/adapters/python (0.4.190) | 0.4.190 editable | OK-EDITABLE  [pyproject.toml]
+urirun-connector-llm | @ git+https://github.com/if-uri/urirun-connector-llm.git | /home/tom/github/if-uri/urirun-connector-llm (0.3.0) | 0.3.0 non-editable | NON-EDITABLE -> fix: pip install -e /home/tom/github/if-uri/urirun-connector-llm  [pyproject.toml]
+urirun-flow | @ git+https://github.com/if-uri/urirun-flow.git | /home/tom/github/if-uri/urirun-flow (0.2.2) | 0.2.2 editable | OK-EDITABLE  [pyproject.toml]
+
+## EXTERNAL DEPS (no local source, 2): litellm, pytest
