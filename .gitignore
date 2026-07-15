@@ -14,3 +14,4 @@ dist/
 tests/_notes.json
 # generated inner action-space registry for the demo meta-flow
 flows/inner-registry.json
+.code2llm_cache
